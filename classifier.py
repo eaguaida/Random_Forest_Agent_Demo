@@ -9,50 +9,78 @@ import numpy as np
 
 class Classifier:
     def __init__(self):
-        # Initialize multiple models
-        self.rf = CustomRandomForestClassifier(max_depth=5, n_estimators=10, random_state=42)
-        self.dt = CustomDecisionTreeClassifier(max_depth=100)
-        # Create a VotingClassifier ensemble
+        """
+        Constructor for the Classifier class. This class initializes and aggregates multiple models into an
+        ensemble using a VotingClassifier. The ensemble consists of a custom Random Forest and a custom Decision
+        Tree classifier, aiming to leverage the strengths of both for improved prediction performance.
+        """
+        self.rf = CustomRandomForestClassifier(max_depth=5, n_estimators=10, random_state=42)  # Random Forest model
+        self.dt = CustomDecisionTreeClassifier(max_depth=5)  # Decision Tree model
+        # Ensemble model combining both Random Forest and Decision Tree using voting mechanism.
         self.voting_classifier = VotingClassifier(estimators=[('rf', self.rf), ('dt', self.dt)])
 
     def reset(self):
-        # Reinitialize the models and VotingClassifier
+        """
+        Reinitializes the models and the VotingClassifier. This method can be used to reset the state of the
+        ensemble and its constituent models to their initial configuration. Useful for running new experiments
+        from a clean state without interference from previous training.
+        """
+        # Reinitialize the models with their initial parameters.
         self.rf = CustomRandomForestClassifier(max_depth=5, n_estimators=10, random_state=42)
-        self.dt = CustomDecisionTreeClassifier(max_depth=100)
-        # Reset the list of models
+        self.dt = CustomDecisionTreeClassifier(max_depth=5)
+        # Reset the VotingClassifier with the newly initialized models.
         self.voting_classifier = VotingClassifier(estimators=[('rf', self.rf), ('dt', self.dt)])
 
-
     def fit(self, data, target):
-        # Train the ensemble model with data
-        #self.model.fit(data, target)
+        """
+        Fits the ensemble model to the training data. This method forwards the training data to the
+        VotingClassifier's fit method, effectively training all the underlying models on the given dataset.
+        
+        Parameters:
+        - data (array-like): The training input samples.
+        - target (array-like): The target values (class labels) for the training samples.
+        """
+        
+        # Train the ensemble model on the provided dataset.
         self.voting_classifier.fit(data, target)
+        print("> Training complete.")
 
     def predict(self, data, legal=None):
-         # Predict using the VotingClassifier
+        """
+        Predicts the class label for the given input data using the VotingClassifier. This method also includes
+        an optional mechanism to ensure that predictions are constrained to a set of legal moves, if provided.
+        
+        Parameters:
+        - data (array-like): The input sample(s) to predict.
+        - legal (list, optional): A list of legal moves. If provided, the prediction is checked against this list,
+          and an alternative legal move is selected if necessary.
+        
+        Returns:
+        - The predicted class label, adjusted for legality if required.
+        """
+        # Obtain predictions for the provided data using the VotingClassifier.
         predictions = self.voting_classifier.predict([data])
-        prediction = predictions[0]  # Assuming [data] was a single instance
+        prediction = predictions[0]  # Extract the single prediction assuming [data] was a single instance.
 
-        # Map the prediction number to direction string
+        # Map the numeric prediction to a corresponding direction string.
         number_to_direction = {0: 'North', 1: 'East', 2: 'South', 3: 'West'}
         prediction_str = number_to_direction.get(prediction, 'Stop')
-        # Decision logic considering legal moves
-        if legal is not None:
-            if prediction_str in legal:
-                print(f"Predicted and chosen move: {prediction_str}, Legal moves: {legal}")
-                return prediction_str
-            else:
-                chosen = np.random.choice(legal)
-                print(f"Predicted move: {prediction_str}, but chosen legal move: {chosen} because it was not legal.")
-                return chosen
+
+        # Handle legality of the predicted move.
+        if legal is not None and prediction_str not in legal:
+            # If the predicted move is not legal, choose a random legal move.
+            chosen = np.random.choice(legal)
+            print(f"Predicted move: {prediction_str}, but chosen legal move: {chosen} because it was not legal.")
+            return chosen
         else:
-            print(f"Predicted move: {prediction_str}, but no legal moves provided.")
+            # If no legality issues, return the predicted move directly.
+            print(f"Predicted and chosen move: {prediction_str}, Legal moves: {legal}")
             return prediction_str
+
                 
 class CustomDecisionTreeClassifier:
     def __init__(self, max_depth=None):
         """
-        
         Parameters:
             max_depth (int, optional): The maximum depth of the tree. If None, the tree
             grows until all leaves are pure or until all leaves contain less than
@@ -70,9 +98,11 @@ class CustomDecisionTreeClassifier:
             a vector of features for a single sample.
             y (list): The target values (class labels) for the training samples.
         """
-        # Combine features and targets into a single dataset for easier manipulation
+       # Combine features and targets into a single dataset for easier manipulation
         dataset = [list(x) + [y] for x, y in zip(X, y)]
+        
         # Build the decision tree
+        print("-", end='', flush=True)
         self.tree = self.build_tree(dataset, 1)
 
     def predict(self, X):
@@ -348,6 +378,7 @@ class CustomRandomForestClassifier:
         - X (array-like): Feature matrix representing the input data.
         - y (array-like): Target values (labels) for the input data.
         """
+        print("Starting training of Random Forest with {} estimators.".format(self.n_estimators))
         self.trees = []  # Resetting/initializing the list of trees.
 
         def build_tree(seed):
