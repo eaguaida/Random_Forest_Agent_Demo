@@ -1,7 +1,7 @@
 # Pac-Man Classifier with Random Forest
 
 ## Introduction
-A ML Project that uses an Ensemble Method of Decision Trees + Random Forest + Majority Voting in Pac-Man, the Agent uses data in a text format "goodmoves.txt" in with the classifer, it predicts a good movement according to its environment.
+This is a Machine Learning project where an agent in the Pac-Man world learns its environment through a data file. This data is fed into a Random Forest classifier implemented from scratch (not using scikit-learn). The agent uses data in a text format file, "goodmoves.txt", with the classifier to predict a good movement according to its environment.
 
 ## Installation
 To set up the project, follow these steps:
