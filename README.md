@@ -1,7 +1,6 @@
 # Pac-Man Classifier with Random Forest
-# Pac-Man Q-Learning Agent
 <div align="center">
-  <img src="image.png" alt="Pac-Man" width="300"/>
+  <img src="image.png" alt="Pac-Man" width="600"/>
 </div><br>
 
 ## Introduction
