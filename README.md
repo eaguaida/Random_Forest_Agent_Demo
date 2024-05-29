@@ -9,10 +9,8 @@ To execute the agent, use the following command:
 ```bash
 python3 pacman.py ClassifierAgent
 ```
-## Features
+## Classifiers
 - Decision Tree
 - Random Forest Classification
 - Majority voting system
 
-## Dependencies
-Dependencies required for the project.
